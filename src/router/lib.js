@@ -1,6 +1,7 @@
 import {store} from './store.js'
 import confluxPortal from '../lib/conflux-portal'
 import {keccak256} from 'js-sha3'
+import {personal_sign_eth} from '@/lib/eth'
 
 // (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
 // (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18
@@ -82,6 +83,22 @@ export function hexToBytes(hex) {
 }
 
 export function doCommand(request, url, fn) {
+    request.account = (store.account || [])[0];
+    if (!request.account) {
+        handler.onError(`Please connect wallet.`)
+        return;
+    }
+    request.time = new Date().Format('yyyy-MM-dd hh:mm:ss');
+    console.log(`do command `, request)
+    const msg = `cmd:${request.command}; time:${request.time}`.toString();
+    personal_sign_eth(msg, request.account).then(res=>{
+        console.log(`sign result`, res)
+        request.signature = res;
+        return rpc(url, request);
+    }).then(fn)
+    .catch(handler.onError);
+}
+export function doCommandCfx(request, url, fn) {
     let time = new Date().getTime();
     request.timestamp = time;
     rpc(request.encodeType || 'system/encode', request, 'POST', ()=>{/**ignore 404 or fail*/})
