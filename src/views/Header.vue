@@ -38,10 +38,10 @@
                 </el-form-item>
             </el-form>
         </el-dialog>
-        <el-button @click="conn2portal" v-show="!account" size="mini">Connect to Conflux Portal</el-button>
-        <span class="ml10" v-show="account">Portal Account: {{account}}</span>😊
+        <el-button @click="conn2portal" v-show="!account" size="mini">Connect to Metamask</el-button>
+        <span class="ml10" v-show="account">Account: {{account}}</span>😊
         <span v-if="showPortalTip" class="error">
-            Conflux Portal Not Detected!
+            Metamask Not Detected!
         </span>
         <div style="float:right">
             <span>
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-    import confluxPortal from '../lib/conflux-portal'
+    // import confluxPortal from '../lib/conflux-portal'
     export default {
         name: "Header",
         data(){
@@ -66,14 +66,13 @@
                 account: '',
                 host: this.store.host,
                 expireAt: '',
-                showPortalTip: typeof window.conflux === 'undefined'
+                showPortalTip: typeof window.ethereum === 'undefined'
             }
         },
         methods: {
             login() {
                 const request = {
-                    command: 'login',
-                    comment: 'login request'
+                    command: 'login'
                 }
                 this.doCommand(request, 'system/login', data=>{
                     this.updateLoginInfo(data);
@@ -112,10 +111,16 @@
                 this.hostBoxVisible = true;
             },
             async conn2portal(){
-                await confluxPortal.enable()
-                const account = confluxPortal.getAccount()
-                this.account = account;
-                this.store.account = account;
+                if (this.showPortalTip) {
+                    return;
+                }
+                // await confluxPortal.enable();
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }).catch(e=>{
+                    console.log(`eth accounts error:`, e)
+                    return [""]
+                });
+                this.account = accounts[0];
+                this.store.account = accounts;
                 // this.$message('Portal Connected.')
             },
             changeHost(v) {
@@ -127,7 +132,7 @@
         },
         mounted() {
             if (!this.showPortalTip) {
-                this.conn2portal();
+                // this.conn2portal();
             }
             const str = localStorage.getItem('hosts')
             if (str.length > 10) {
