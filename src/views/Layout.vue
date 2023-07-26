@@ -55,7 +55,7 @@
                     </div>
                 </el-main>
                 <el-footer height="auto" class="footer">
-                    <div>Conflux DEX 2020</div>
+                    <div>Conflux DEX {{year}}</div>
                 </el-footer>
             </el-container>
         </el-container>
@@ -70,7 +70,8 @@
         components: {TagsView, Header},
         data() {
             return {
-                openeds: ['welcome', 'common', 'currencies', 'system', 'account', 'market']
+                openeds: ['welcome', 'common', 'currencies', 'system', 'account', 'market'],
+                year: new Date().getFullYear(),
             }
         },
         methods: {
