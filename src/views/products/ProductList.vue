@@ -4,22 +4,37 @@
             <el-button type="primary" size="small" @click="showAdd"><i class="el-icon-plus"/>Add</el-button>
             <el-button size="small" @click="loadList"><i class="el-icon-refresh"/></el-button>
             <el-dialog title="Add Product" :visible.sync="showAddDialog">
-                <el-form v-model="addForm" label-width="200px">
+                <el-form v-model="addForm" label-width="200px" size="mini">
                     <el-form-item label="Name">
-                        <el-input v-model="addForm.name"></el-input>
+                      <el-row>
+                        <el-col :span="6">
+                          <el-input v-model="addForm.name"></el-input>
+                        </el-col>
+                        <el-col :span="6"><el-button :disabled="addForm.checkedCurrencies.length<2" :style="{marginLeft:'6px'}" @click="()=>{
+                          if (addForm.checkedCurrencies.length===2) {
+                            addForm.name = (currencies.find(c=>c.id===addForm.checkedCurrencies[0]) || {}).name
+                             + '-' + (currencies.find(c=>c.id===addForm.checkedCurrencies[1]) || {}).name
+                          }
+                        }" size="mini">Build Name</el-button></el-col>
+                      </el-row>
                     </el-form-item>
                     <el-form-item label="Select Currency">
                         <el-checkbox-group
                                 v-model="addForm.checkedCurrencies"
                                 :min="0"
                                 :max="2">
-                            <el-checkbox v-for="item in currencies" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+                            <el-checkbox
+                                v-for="item in currencies"
+                                v-model="item.checked"
+                                :label="item.id"
+                                :key="item.id">{{item.id}}:{{item.name}}</el-checkbox>
                         </el-checkbox-group>
+                    <el-button @click="loadList" size="mini">Reload currencies</el-button>
                     </el-form-item>
                     <el-form-item label="Currency Pair">
                         <el-row>
-                            <el-col :span="12">Base:<span style="color:#409EFF; font-weight: 500;">{{(addForm.checkedCurrencies[0] || {}).name}}</span></el-col>
-                            <el-col :span="12">Quote:<span style="color:#409EFF; font-weight: 500;">{{(addForm.checkedCurrencies[1] || {}).name}}</span></el-col>
+                            <el-col :span="12">Base:<span style="color:#409EFF; font-weight: 500;">{{(currencies.find(c=>c.id===addForm.checkedCurrencies[0]) || {}).name}}</span></el-col>
+                            <el-col :span="12">Quote:<span style="color:#409EFF; font-weight: 500;">{{(currencies.find(c=>c.id===addForm.checkedCurrencies[1]) || {}).name}}</span></el-col>
                         </el-row>
                     </el-form-item>
                     <el-form-item label="Funds Precision">
@@ -129,12 +144,12 @@
                     name: '',
                     baseCurrencyId: -1,
                     quoteCurrencyId: -1,
-                    fundsPrecision: 8,
-                    pricePrecision: 2,
+                    fundsPrecision: 6,
+                    pricePrecision: 6,
                     amountPrecision: 6,
                     maxOrderAmount: 99999999.999999,
-                    minOrderAmount: 0.0001,
-                    minOrderFunds: 1e-8,
+                    minOrderAmount: 0.000001,
+                    minOrderFunds: 0.000001,
                 },
                 addForm: {
                     checkedCurrencies: [],
@@ -142,20 +157,20 @@
                     name: '',
                     baseCurrencyId: -1,
                     quoteCurrencyId: -1,
-                    fundsPrecision: 8,
-                    pricePrecision: 2,
+                    fundsPrecision: 6,
+                    pricePrecision: 6,
                     amountPrecision: 6,
                     maxOrderAmount: 99999999.999999,
-                    minOrderAmount: 0.0001,
-                    minOrderFunds: 1e-8,
+                    minOrderAmount: 0.000001,
+                    minOrderFunds: 0.000001,
                 }
             }
         },
         methods: {
             submit() {
                 const product = Object.assign({}, this.addForm);
-                product.baseCurrencyId = this.addForm.checkedCurrencies[0].id;
-                product.quoteCurrencyId = this.addForm.checkedCurrencies[1].id;
+                product.baseCurrencyId = this.addForm.checkedCurrencies[0];
+                product.quoteCurrencyId = this.addForm.checkedCurrencies[1];
                 delete product.checkedCurrencies;
                 const request = {product};
                 request.encodeType = 'products/encode-add-product';
