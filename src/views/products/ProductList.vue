@@ -1,8 +1,10 @@
 <template>
     <div>
         <div>
-            <el-button type="primary" size="small" @click="showAdd"><i class="el-icon-plus"/>Add</el-button>
-            <el-button size="small" @click="loadList"><i class="el-icon-refresh"/></el-button>
+            <el-button type="primary" size="mini" @click="showAdd"><i class="el-icon-plus"/>Add</el-button>
+            <el-checkbox style="margin: 6px 6px" v-model="filter" @change="loadList">filter disabled</el-checkbox>
+            <el-button size="mini" @click="loadList"><i class="el-icon-refresh"/></el-button>
+            <el-button @click="clearListCache" type="" size="mini">Clear List Cache</el-button>
             <el-dialog title="Add Product" :visible.sync="showAddDialog">
                 <el-form v-model="addForm" label-width="200px" size="mini">
                     <el-form-item label="Name">
@@ -67,7 +69,13 @@
                 stripe
                 style="width: 100%">
             <el-table-column prop="id" label="Id" width="40" ></el-table-column>
-            <el-table-column prop="name" label="Name" width="100"></el-table-column>
+            <el-table-column prop="name" label="Name" width="150">
+                <template slot-scope="d">
+                    {{d.row.name}}
+                    <br/>
+                    <span style="color: #ff0000">{{ d.row.disabled ? 'disabled' : '' }}</span>
+                </template>
+            </el-table-column>
             <el-table-column prop="" label="Currency Id" width="100">
                 <template slot-scope="d">
                     {{d.row.baseCurrencyId}}-{{d.row.quoteCurrencyId}}
@@ -136,6 +144,7 @@
         name: "ProductList",
         data() {
             return {
+                filter: false,
                 products: [],
                 showAddDialog: false,
                 showEditDialog: false,
@@ -209,12 +218,27 @@
             },
             loadList() {
                 this.products = [];
-                this.getRpc('products?offset=0&limit=20').then(data=>{
+                const filterIt = this.filter ? '' : '&filter=false'
+                this.getRpc(`products?offset=0&limit=20${filterIt}`).then(data=>{
                     data.items.sort((a,b)=>a.id - b.id);
                     this.products = data.items
                 });
                 this.getRpc('currencies?offset=0&limit=20').then(data=>{
                     this.currencies = data.items;
+                })
+            },
+            clearListCache() {
+                const body = {
+                    key: 'list',
+                    cacheName: 'dao.product',
+                };
+                this.rpc('cache/ehcache/remove', body).then(removed=>{
+                    this.$notify({
+                        title: 'Remove result',
+                        message: removed ? 'Removed' : 'Not found',
+                        type: removed ? 'success' : 'warning'
+                    });
+                    this.loadList();
                 })
             }
         },

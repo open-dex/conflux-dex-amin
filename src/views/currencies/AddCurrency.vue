@@ -1,5 +1,5 @@
 <template>
-    <el-form :style="{maxWidth:'620px'}" ref="form" :model="form" label-width="280px" class="left" size="mini">
+    <el-form :style="{maxWidth:'660px'}" ref="form" :model="form" label-width="280px" class="left" size="mini">
         <el-form-item label="Original Token Address"><el-input v-model="form.tokenAddress"></el-input></el-form-item>
         <el-form-item label="Name">
             <el-row>
