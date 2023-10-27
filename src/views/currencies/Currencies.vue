@@ -4,11 +4,11 @@
             <el-form-item>
                 <el-button size="small" @click="loadList"><i class="el-icon-refresh"/></el-button>
             </el-form-item>
-            <el-form-item label="Currency Name">
+            <el-form-item label="Currency Name:">
                 <el-input v-model="form.name" size="mini"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button @click="deploy" type="primary" size="mini" :disabled="form.name === ''">Deploy CRCL&Token</el-button>
+                <el-button @click="deploy" type="primary" size="mini" :disabled="form.name === ''">Deploy CRCL</el-button>
             </el-form-item>
               <el-form-item>
                 <el-button @click="clearListCache" type="" size="mini">Clear List Cache</el-button>

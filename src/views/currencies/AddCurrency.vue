@@ -1,8 +1,17 @@
 <template>
-    <el-form ref="form" :model="form" label-width="280px" class="left">
-        <el-form-item label="Name"><el-input v-model="form.name"></el-input></el-form-item>
-        <el-form-item label="Contract Address"><el-input v-model="form.contractAddress"></el-input></el-form-item>
-        <el-form-item label="Token Address"><el-input v-model="form.tokenAddress"></el-input></el-form-item>
+    <el-form :style="{maxWidth:'620px'}" ref="form" :model="form" label-width="280px" class="left" size="mini">
+        <el-form-item label="Original Token Address"><el-input v-model="form.tokenAddress"></el-input></el-form-item>
+        <el-form-item label="Name">
+            <el-row>
+                <el-col :span="12">
+                    <el-input v-model="form.name"></el-input>
+                </el-col>
+                <el-col :span="12">
+                    <el-button :style="{marginLeft:'6px'}" @click="getTokenInfo" size="mini">Get name on chain</el-button>
+                </el-col>
+            </el-row>
+        </el-form-item>
+        <el-form-item label="CRCL Contract Address"><el-input v-model="form.contractAddress"></el-input></el-form-item>
         <el-form-item label="Decimal Digits"><el-input v-model="form.decimalDigits"></el-input></el-form-item>
         <el-form-item label="Cross Chain"><el-switch v-model="form.crossChain"></el-switch></el-form-item>
         <el-form-item label="Minimum Withdraw Amount"><el-input v-model="form.minimumWithdrawAmount"></el-input></el-form-item>
@@ -16,7 +25,7 @@
     export default {
         name: "AddCurrency",
         data() {
-            const holder = {
+            return {
                 form: {
                     id: 0,
                     name: '',
@@ -27,18 +36,19 @@
                     minimumWithdrawAmount: 0,
                 }
             };
-            //fill test data
-            holder.form.contractAddress = '0x8acf09aa9d1b9783bb17f97fca6bfedb79f395b7';
-            holder.form.name = 'Test';
-            holder.form.tokenAddress = '0x89801508937274f45a921a2fe1bcfb86e1c278b7';
-            return holder;
         },
         computed: {
             canSubmit: function (){
-                return this.form.name.length > 0 && this.form.contractAddress.length > 0 && this.form.tokenAddress.length > 0;
+                return this.form.name.length > 0 && this.form.tokenAddress.length > 0;
             }
         },
         methods: {
+            getTokenInfo() {
+                this.getRpc(`currencies/get-token-info?hex=${this.form.tokenAddress}`).then(res=>{
+                    this.form.name = res.name;
+                    this.form.decimalDigits = parseInt(res.decimals || '18')
+                })
+            },
             async onSubmit() {
                 console.log('submit!');
                 const request = {
